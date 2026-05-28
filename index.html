@@ -1268,7 +1268,7 @@ async function saveToSheet() {
   const csvLine = row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
 
   try {
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_ID/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFJMILXNMvdc7aKQ45b_WcTW3m2aQF28D-29Whzu4aC8AObHbmcFjksddDMD31Z7O-/exec';
     const resp = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
