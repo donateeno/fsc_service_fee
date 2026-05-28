@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบคำนวนค่าเดินทาง — First Service Center (Thailand)</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #1D4E8A;
+  --primary-light: #E6EFF9;
+  --primary-mid: #2563B0;
+  --accent: #0F6E56;
+  --accent-light: #E1F5EE;
+  --amber: #B45309;
+  --amber-light: #FEF3C7;
+  --coral: #993C1D;
+  --coral-light: #FAECE7;
+  --surface: #FFFFFF;
+  --surface-alt: #F5F7FA;
+  --border: rgba(0,0,0,0.09);
+  --border-strong: rgba(0,0,0,0.16);
+  --text: #111827;
+  --text-muted: #4B5563;
+  --text-light: #9CA3AF;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 6px rgba(0,0,0,0.07);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+body {
+  font-family: 'Sarabun', 'IBM Plex Sans Thai', sans-serif;
+  background: #E9EDF4;
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 60px;
+}
+
+/* ===== NAV TABS ===== */
+.top-nav {
+  background: var(--primary);
+  padding: 0 24px;
+  display: flex;
+  gap: 0;
+  max-width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.nav-tab {
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.nav-tab:hover { color: rgba(255,255,255,0.9); }
+.nav-tab.active { color: #fff; border-bottom-color: #60A5FA; }
+
+/* ===== PAGE HEADER ===== */
+.page-hero {
+  background: var(--primary);
+  padding: 24px 24px 28px;
+  color: white;
+}
+
+.hero-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.logo-mark {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.logo-mark svg { width: 28px; height: 28px; fill: white; }
+
+.hero-text h1 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.hero-text p {
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.5;
+}
+
+.version-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
+
+/* ===== PAGE SECTIONS ===== */
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+.content-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-alt);
+}
+
+.step-num {
+  width: 26px; height: 26px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.card-header h2 { font-size: 14px; font-weight: 600; color: var(--text); }
+.card-body { padding: 20px; }
+
+/* ===== FORM ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+
+label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+input[type="text"], input[type="number"], input[type="date"], select, textarea {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(29,78,138,0.13);
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+input[type="date"] { cursor: pointer; }
+
+.date-hint {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 2px;
+  display: none;
+}
+
+.input-unit { position: relative; }
+.input-unit input { padding-right: 52px; }
+.unit-label {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 500;
+  pointer-events: none;
+}
+
+/* ===== INFO BOX ===== */
+.info-box {
+  background: var(--primary-light);
+  border: 1px solid rgba(29,78,138,0.18);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--primary);
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 14px;
+}
+
+.info-box.warn {
+  background: var(--amber-light);
+  border-color: rgba(180,83,9,0.2);
+  color: var(--amber);
+}
+
+.info-box svg { flex-shrink: 0; margin-top: 1px; }
+
+/* ===== VEHICLE CHIP ===== */
+.vehicle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--amber-light);
+  color: var(--amber);
+  border: 1px solid rgba(180,83,9,0.2);
+}
+
+/* ===== RATE DISPLAY ===== */
+.rate-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.rate-val { font-size: 22px; font-weight: 700; color: var(--primary); }
+.rate-unit { font-size: 13px; color: var(--text-muted); }
+
+/* ===== MULTIPLIER BOX ===== */
+.multiplier-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.mult-box {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+}
+
+.mult-box .m-label { font-size: 11px; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px; }
+.mult-box .m-val { font-size: 18px; font-weight: 700; }
+.mult-box.highlight { background: var(--primary-light); border-color: rgba(29,78,138,0.2); }
+.mult-box.highlight .m-val { color: var(--primary); }
+
+/* ===== BUTTONS ===== */
+.btn-calc {
+  width: 100%;
+  height: 50px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.08s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+.btn-calc:hover { background: #163D6E; }
+.btn-calc:active { transform: scale(0.99); }
+
+.btn-save {
+  width: 100%;
+  height: 44px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 10px;
+}
+
+.btn-save:hover { background: #085041; }
+.btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-reset {
+  width: 100%;
+  height: 40px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 8px;
+}
+
+.btn-reset:hover { background: var(--surface-alt); color: var(--text); }
+
+.print-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; height: 40px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+  margin-top: 10px;
+}
+
+.print-btn:hover { background: var(--surface-alt); color: var(--text); }
+
+/* ===== RESULT ===== */
+.result-section { display: none; }
+.result-section.show { display: block; animation: slideIn 0.3s ease; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-hero {
+  background: linear-gradient(135deg, #1D4E8A 0%, #0C3260 100%);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  color: white;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+
+.result-hero .label-sm { font-size: 12px; opacity: 0.7; margin-bottom: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+.result-hero .amount { font-size: 46px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+.result-hero .currency { font-size: 22px; font-weight: 400; opacity: 0.8; margin-right: 3px; vertical-align: middle; }
+.result-hero .amount-note { font-size: 12px; opacity: 0.6; margin-top: 8px; }
+
+.cost-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.cost-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+
+.cost-item .ci-label { font-size: 11px; color: var(--text-light); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+.cost-item .ci-val { font-size: 17px; font-weight: 700; color: var(--text); }
+.cost-item .ci-unit { font-size: 11px; color: var(--text-muted); margin-left: 2px; }
+
+.formula-box {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+
+.formula-box h3 { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.formula-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 13px;
+}
+
+.formula-row:last-child { border-bottom: none; }
+.formula-row .f-label { color: var(--text-muted); }
+.formula-row .f-val { font-weight: 600; color: var(--text); }
+.formula-row.total { padding-top: 10px; }
+.formula-row.total .f-label { font-weight: 700; color: var(--text); font-size: 14px; }
+.formula-row.total .f-val { color: var(--primary); font-size: 17px; font-weight: 700; }
+
+.save-status {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+  text-align: center;
+  display: none;
+}
+
+.save-status.success { background: var(--accent-light); color: var(--accent); display: block; }
+.save-status.error { background: var(--coral-light); color: var(--coral); display: block; }
+
+/* ===== PRICELIST PAGE ===== */
+.price-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.price-tab-btn {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.price-tab-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+.price-tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+.price-panel { display: none; }
+.price-panel.active { display: block; }
+
+.price-table-wrap { overflow-x: auto; }
+
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.price-table th {
+  background: var(--primary);
+  color: white;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.price-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.price-table tr:nth-child(even) td { background: var(--surface-alt); }
+.price-table tr:hover td { background: var(--primary-light); }
+
+.price-amount {
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.service-id {
+  font-family: monospace;
+  font-size: 11px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.section-heading {
+  background: var(--amber-light);
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--amber);
+  border-bottom: 1px solid rgba(180,83,9,0.15);
+}
+
+.note-box {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-top: 16px;
+}
+
+.note-box h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+
+/* ===== FOOTER ===== */
+footer {
+  max-width: 960px;
+  margin: 32px auto 0;
+  padding: 20px 20px 0;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-logo {
+  width: 30px; height: 30px;
+  background: var(--primary);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+}
+.footer-logo svg { width: 17px; height: 17px; }
+.footer-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.footer-name-en { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.footer-desc { font-size: 11px; color: var(--text-light); text-align: right; line-height: 1.7; }
+
+@media (max-width: 600px) {
+  .cost-breakdown { grid-template-columns: 1fr 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .result-hero .amount { font-size: 36px; }
+  .nav-tab { padding: 12px 12px; font-size: 12px; }
+}
+
+@media print {
+  .top-nav, .btn-calc, .btn-reset, .btn-save, .print-btn, .price-tabs, .price-panel:not(.active) { display: none !important; }
+  body { background: white; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="top-nav">
+  <div class="nav-tab active" onclick="switchPage('calc')">🚗 คำนวนค่าเดินทาง</div>
+  <div class="nav-tab" onclick="switchPage('eve')">📋 EVE Pricelist</div>
+  <div class="nav-tab" onclick="switchPage('misc')">🔧 Misc. คชจ.นอกแพ็คเกจ</div>
+  <div class="nav-tab" onclick="switchPage('foster')">📋 Foster Pricelist</div>
+  <div class="nav-tab" onclick="switchPage('detail')">📄 รายละเอียดงานติดตั้ง</div>
+</div>
+
+<!-- HERO HEADER -->
+<div class="page-hero">
+  <div class="hero-inner">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+      </svg>
+    </div>
+    <div class="hero-text">
+      <h1>ระบบคำนวนค่าเดินทาง งานบริการนอกพื้นที่เขตกรุงเทพฯและปริมณฑล</h1>
+      <p>กำหนดใช้ 01 Jun 2026 เป็นต้นไป จนกว่าจะมีการแจ้งเปลี่ยนแปลง</p>
+      <div class="version-badge">V01.00</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== PAGE: CALCULATOR ======== -->
+<div id="page-calc" class="page-section active">
+<div class="content-wrap">
+
+  <!-- ขั้นตอนที่ 1 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step-num">1</div>
+      <h2>ข้อมูลพนักงานและการเดินทาง</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ชื่อ-นามสกุล</label>
+          <input type="text" id="emp-name" placeholder="กรอกชื่อ-นามสกุล" />
+        </div>
+        <div class="form-group">
+          <label>แผนก / ฝ่าย</label>
+          <input type="text" id="emp-dept" placeholder="เช่น ฝ่ายผลิตภัณฑ์และงานบริการ" />
+        </div>
+        <div class="form-group">
+          <label>วันที่เดินทาง</label>
+          <input type="date" id="trip-date" onchange="updateDateDisplay()" />
+          <span class="date-hint" id="date-hint"></span>
+        </div>
+        <div class="form-group">
+          <label>วัตถุประสงค์</label>
+          <input type="text" id="trip-purpose" placeholder="เช่น งานติดตั้ง / ซ่อมบำรุง" />
+        </div>
+        <div class="form-group">
+          <label>ต้นทาง</label>
+          <input type="text" id="trip-from" placeholder="เช่น สำนักงานกรุงเทพฯ" />
+        </div>
+        <div class="form-group">
+          <label>ปลายทาง (จังหวัด)</label>
+          <input type="text" id="trip-to" placeholder="เช่น จ.ชลบุรี" />
+        </div>
+        <div class="form-group full">
+          <label>ระยะทาง (กม.) — ไป-กลับรวม</label>
+          <div class="input-unit">
+            <input type="number" id="distance" placeholder="0" min="0" step="1" />
+            <span class="unit-label">กม.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ขั้นตอนที่ 2 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step-num">2</div>
+      <h2>ประเภทรถยนต์และราคาน้ำมัน</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ประเภทรถ</label>
+          <div style="display:flex; align-items:center; gap:10px; height:40px;">
+            <div class="vehicle-chip">🚙 รถกระบะ 4WD (2,500–3,000 CC / ดีเซล)</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>อัตราสิ้นเปลืองมาตรฐาน</label>
+          <div class="rate-display">
+            <div>
+              <div class="rate-val">10</div>
+              <div class="rate-unit">กม./ลิตร — มาตรฐานบริษัทฯ</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>ราคาน้ำมันดีเซล (บาท/ลิตร)</label>
+          <div class="input-unit">
+            <input type="number" id="fuel-price" placeholder="เช่น 33.50" min="0" step="0.01" />
+            <span class="unit-label">บาท/ล.</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="info-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>ค่าเดินทางที่เรียกเก็บ = ต้นทุนค่าน้ำมัน × 1.20 (ตัวคูณ Markup 20%) — ใส่ราคาน้ำมันดีเซลเฉลี่ยรายเดือนจากกรมธุรกิจพลังงาน</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ปุ่ม -->
+  <button class="btn-calc" onclick="calculate()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3"/><rect x="9" y="3" width="6" height="6" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+    คำนวนค่าเดินทาง
+  </button>
+  <button class="btn-reset" onclick="resetForm()">รีเซ็ตแบบฟอร์ม</button>
+
+  <!-- ผลลัพธ์ -->
+  <div class="result-section" id="result-section" style="margin-top:20px;">
+
+    <div class="result-hero">
+      <div class="label-sm">ค่าเดินทางที่เรียกเก็บ (รวม Markup 20%)</div>
+      <div class="amount">
+        <span class="currency">฿</span><span id="result-amount">0</span>
+      </div>
+      <div class="amount-note" id="result-note"></div>
+    </div>
+
+    <div class="cost-breakdown">
+      <div class="cost-item">
+        <div class="ci-label">ระยะทาง</div>
+        <div class="ci-val"><span id="r-distance">—</span><span class="ci-unit">กม.</span></div>
+      </div>
+      <div class="cost-item">
+        <div class="ci-label">ปริมาณน้ำมัน</div>
+        <div class="ci-val"><span id="r-fuel">—</span><span class="ci-unit">ลิตร</span></div>
+      </div>
+      <div class="cost-item">
+        <div class="ci-label">ต้นทุนค่าน้ำมัน</div>
+        <div class="ci-val">฿<span id="r-cost">—</span></div>
+      </div>
+      <div class="cost-item">
+        <div class="ci-label">ราคาน้ำมัน</div>
+        <div class="ci-val"><span id="r-price">—</span><span class="ci-unit">บาท/ล.</span></div>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      <h3>รายละเอียดการคำนวน</h3>
+      <div class="formula-row"><span class="f-label">พนักงาน</span><span class="f-val" id="fr-name">—</span></div>
+      <div class="formula-row"><span class="f-label">แผนก</span><span class="f-val" id="fr-dept">—</span></div>
+      <div class="formula-row"><span class="f-label">วันที่เดินทาง</span><span class="f-val" id="fr-date">—</span></div>
+      <div class="formula-row"><span class="f-label">วัตถุประสงค์</span><span class="f-val" id="fr-purpose">—</span></div>
+      <div class="formula-row"><span class="f-label">เส้นทาง</span><span class="f-val" id="fr-route">—</span></div>
+      <div class="formula-row"><span class="f-label">ประเภทรถ</span><span class="f-val">รถกระบะ 4WD (2,500–3,000 CC / ดีเซล)</span></div>
+      <div class="formula-row"><span class="f-label">อัตราสิ้นเปลือง (มาตรฐาน)</span><span class="f-val">10 กม./ลิตร</span></div>
+      <div class="formula-row"><span class="f-label">ระยะทาง</span><span class="f-val" id="fr-dist">—</span></div>
+      <div class="formula-row"><span class="f-label">ปริมาณน้ำมัน (ระยะทาง ÷ 10)</span><span class="f-val" id="fr-fuel">—</span></div>
+      <div class="formula-row"><span class="f-label">ราคาน้ำมันดีเซล</span><span class="f-val" id="fr-price">—</span></div>
+      <div class="formula-row"><span class="f-label">ต้นทุนค่าน้ำมัน</span><span class="f-val" id="fr-base">—</span></div>
+      <div class="formula-row"><span class="f-label">ตัวคูณ Markup</span><span class="f-val">× 1.20</span></div>
+      <div class="formula-row total"><span class="f-label">ค่าเดินทางที่เรียกเก็บ</span><span class="f-val" id="fr-total">—</span></div>
+    </div>
+
+    <button class="btn-save" id="btn-save" onclick="saveToSheet()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      บันทึกข้อมูลลง Google Sheet
+    </button>
+    <div class="save-status" id="save-status"></div>
+
+    <button class="print-btn" onclick="window.print()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      พิมพ์ / บันทึก PDF
+    </button>
+  </div>
+
+</div>
+</div><!-- end page-calc -->
+
+
+<!-- ======== PAGE: EVE PRICELIST ======== -->
+<div id="page-eve" class="page-section">
+<div class="content-wrap">
+  <div class="card">
+    <div class="card-header">
+      <div class="step-num">📋</div>
+      <h2>ราคาค่าบริการติดตั้ง — แบรนด์ EVE (มีผล ม.ค. 2567 เป็นต้นไป)</h2>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="price-table-wrap">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th style="width:90px;">Service ID</th>
+              <th>จำแนกประเภทของสินค้า</th>
+              <th style="width:130px;">ค่าบริการ (บาท)</th>
+              <th>หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="service-id">INST003</span></td><td>อ่างล้างจานทุกวัสดุ ติดตั้งบนท็อปเคาน์เตอร์ ไม่รวมก๊อกน้ำ</td><td class="price-amount">1,000</td><td>ราคาไม่รวมการติดตั้งก๊อกน้ำเย็นที่มีให้กับอ่างล้างจาน</td></tr>
+            <tr><td><span class="service-id">INST004</span></td><td>อ่างล้างจานทุกวัสดุ ติดตั้งบนท็อปเคาน์เตอร์ รวมก๊อกน้ำเย็น และ ก๊อกน้ำผสมร้อน/เย็น</td><td class="price-amount">1,300</td><td>ราคาไม่รวมสายน้ำดี</td></tr>
+            <tr><td><span class="service-id">INST005</span></td><td>อ่างล้างจานแสตนเลส ติดตั้งใต้ท็อปเคาน์เตอร์</td><td class="price-amount">1,500 – 2,000</td><td>ระดับราคาขึ้นอยู่กับขนาดและความซับซ้อนของคานรับซิงค์ใต้ท็อป</td></tr>
+            <tr><td><span class="service-id">INST006</span></td><td>ก๊อกน้ำทุกประเภท (ผสมร้อน-เย็น, เย็น, ตั้งบนเคาน์เตอร์, ออกผนัง, ผสมร้อน-เย็นและน้ำดื่ม)</td><td class="price-amount">1,000</td><td></td></tr>
+            <tr><td><span class="service-id">INST007</span></td><td>เครื่องบดเศษอาหาร กับสะดือ 110–114 มม.</td><td class="price-amount">1,300</td><td></td></tr>
+            <tr><td><span class="service-id">INST008</span></td><td>เครื่องล้างจานชนิดตั้งบนพื้น ไม่ฝังเฟอร์นิเจอร์ (FREESTANDING)</td><td class="price-amount">1,300</td><td></td></tr>
+            <tr><td><span class="service-id">INST009</span></td><td>เครื่องกรองน้ำชนิด RO</td><td class="price-amount">1,000</td><td></td></tr>
+            <tr><td><span class="service-id">INST010</span></td><td>เครื่องกรองน้ำชนิด NON RO / ไม่มีระบบน้ำทิ้ง</td><td class="price-amount">600</td><td></td></tr>
+            <tr><td><span class="service-id">INST011</span></td><td>เตาแก๊สชนิดฝังหรือตั้งบนเคาน์เตอร์ท็อป</td><td class="price-amount">500</td><td></td></tr>
+            <tr><td><span class="service-id">INST012</span></td><td>เตาไฟฟ้าชนิดฝังบนเคาน์เตอร์ท็อป</td><td class="price-amount">850</td><td></td></tr>
+            <tr><td><span class="service-id">INST013</span></td><td>เครื่องดูดควันติดผนัง, ติดซ่อนในตู้แขวน ระบบหมุนเวียนอากาศหรือหน้างานเดินท่อลมไว้แล้ว</td><td class="price-amount">1,000</td><td>สินค้าต้องมีแผ่นกรองคาร์บอนฟิลเตอร์ หน้างานเดินท่อลมสำเร็จแล้ว</td></tr>
+            <tr><td><span class="service-id">INST014</span></td><td>เครื่องดูดควันติดผนัง, ติดซ่อนในตู้แขวน ชนิดเดินระบบท่อดูดอากาศใหม่</td><td class="price-amount">1,500</td><td>ไม่รวมค่าบริการในการเจาะผนังสำเร็จมูลค่า 1,000 บาท</td></tr>
+            <tr><td><span class="service-id">INST015</span></td><td>เครื่องดูดควันชนิด Professionale / Commercial type กำลังดูดสูงกว่า 3,000 ลบ.ม./ชม.</td><td class="price-amount">3,500</td><td>ไม่รวมค่าบริการในการเจาะผนังสำเร็จมูลค่า 1,000 บาท</td></tr>
+            <tr><td><span class="service-id">INST016</span></td><td>เครื่องดูดควันชนิดกลางห้อง</td><td class="price-amount">3,500 – 5,500</td><td>ระดับราคาขึ้นอยู่กับความเกี่ยวข้องการเดินระบบท่อลม</td></tr>
+            <tr><td><span class="service-id">INST017</span></td><td>เครื่องดูดควันชนิดติดตั้งบนเคาน์เตอร์</td><td class="price-amount">5,500</td><td></td></tr>
+            <tr><td><span class="service-id">INST018</span></td><td>เตาอบไฟฟ้าและเตาอบไมโครเวฟชนิดฝังตู้เฟอร์นิเจอร์</td><td class="price-amount">850</td><td></td></tr>
+            <tr><td><span class="service-id">INST019</span></td><td>เตาแก๊สและเตาอบไฟฟ้าในตัวเดียวกัน ชนิดตั้งพื้น (FREESTANDING, RANGE)</td><td class="price-amount">1,300</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note-box" style="margin:16px;">
+        <h4>หมายเหตุ</h4>
+        1. ค่าบริการรวมภาษีมูลค่าเพิ่มแล้ว แต่ไม่รวม: ค่าเดินทางนอกพื้นที่กรุงเทพฯ (7 บาท/กม.) / ค่ารื้อถอน / ค่าสำรวจพื้นที่<br>
+        2. ราคาประเมินจากมาตรฐานหน้างานที่มีความพร้อม บริษัทฯ ขอสงวนสิทธิ์ประเมินราคาใหม่เมื่อช่างเข้าถึงหน้างาน<br>
+        3. ไม่ให้บริการ: เจาะท็อป / เก็บงานช่องเจาะ / เดินท่อแก๊สเกิน 3 ม. / เดินท่อลมบนฝ้าฉาบแล้ว / เดินท่อลมเกิน 7 ม.<br>
+        4. รับประกันงานติดตั้ง 90 วัน ไม่เกินมูลค่าผลิตภัณฑ์<br>
+        5. บริษัทฯ ขอสงวนสิทธิ์เปลี่ยนแปลงค่าบริการโดยไม่แจ้งล่วงหน้า
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ======== PAGE: MISC ======== -->
+<div id="page-misc" class="page-section">
+<div class="content-wrap">
+  <div class="card">
+    <div class="card-header">
+      <div class="step-num">🔧</div>
+      <h2>รายการค่าบริการส่วนเกินมาตรฐาน (Misc. คชจ. นอกแพ็คเกจ) — EVE</h2>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="price-table-wrap">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th style="width:40px;">#</th>
+              <th>รายการ / ชื่ออุปกรณ์</th>
+              <th style="width:70px;">หน่วย</th>
+              <th style="width:110px;">ราคา (บาท/หน่วย)</th>
+              <th>หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" class="section-heading">หมวด 1 : เตาฝัง, เตาอบ, เตาแก๊ส, เตาเซรามิก — สายไฟและอุปกรณ์</td></tr>
+            <tr><td>1</td><td>สายไฟ VAF 2×2.5 sq.mm. (เดินไฟเครื่องใช้ครัว)</td><td>เมตร</td><td class="price-amount">30</td><td>รวมค่าวัสดุ</td></tr>
+            <tr><td>2</td><td>สายไฟ VAF 2×4 sq.mm. (เดินไฟกำลังสูง)</td><td>เมตร</td><td class="price-amount">50</td><td>รวมค่าวัสดุ</td></tr>
+            <tr><td>3</td><td>สายไฟ VAF 2×6 sq.mm. (เดินไฟเตาอบ/เตาแม่เหล็กไฟฟ้า)</td><td>เมตร</td><td class="price-amount">70</td><td>รวมค่าวัสดุ</td></tr>
+            <tr><td>4</td><td>สายไฟ VAF 2×10 sq.mm. (เดินไฟกำลังสูงพิเศษ)</td><td>เมตร</td><td class="price-amount">70</td><td>รวมค่าวัสดุ</td></tr>
+            <tr><td>5</td><td>ปลั๊กตัวเมีย 3 ขา พร้อมกล่องฝัง</td><td>ชุด</td><td class="price-amount">200</td><td>รวมกล่องพลาสติก+สกรูยึด</td></tr>
+            <tr><td>6</td><td>ท่อร้อยสาย PVC ขนาด 3/4" สีขาว</td><td>เมตร</td><td class="price-amount">70</td><td>ท่อ PVC มาตรฐาน TIS</td></tr>
+            <tr><td>7</td><td>อุปกรณ์เก็บปลายท่อที่ผนัง ขนาด 3" (เพิ่มจากมาตรฐาน)</td><td>ตัว</td><td class="price-amount">80</td><td>คิดเฉพาะส่วนที่เกินจากชุดมาตรฐาน</td></tr>
+            <tr><td>8</td><td>สายดิน THW 1.5 sq.mm.</td><td>เมตร</td><td class="price-amount">10</td><td>ราคาต่อเมตร</td></tr>
+            <tr><td>9</td><td>เซอร์กิตเบรกเกอร์ (Breaker) 32 แอมป์</td><td>ตัว</td><td class="price-amount">300</td><td>รวมค่าติดตั้ง</td></tr>
+            <tr><td>10</td><td>เซอร์กิตเบรกเกอร์ (Breaker) 50 แอมป์</td><td>ตัว</td><td class="price-amount">500</td><td>รวมค่าติดตั้ง</td></tr>
+            <tr><td>11</td><td>รางครอบสายไฟ #4 พลาสติก</td><td>เมตร</td><td class="price-amount">70</td><td>รวมติดตั้ง</td></tr>
+            <tr><td>12</td><td>แท่งกราวด์ (Ground Rod) ขนาด 30 ซม. ไม่รวมสายไฟ</td><td>จุด</td><td class="price-amount">200</td><td>ราคาต่อจุดฝังดิน</td></tr>
+            <tr><td>13</td><td>ค่าแรงเดินสายไฟ VAF 2×2.5 sq.mm.</td><td>เมตร</td><td class="price-amount">120</td><td>รวมร้อยท่อ</td></tr>
+            <tr><td>14</td><td>ค่าแรงเดินสายไฟ VAF 2×4 sq.mm.</td><td>เมตร</td><td class="price-amount">140</td><td>รวมร้อยท่อ</td></tr>
+            <tr><td>15</td><td>ค่าแรงเดินสายไฟ VAF 2×6 sq.mm.</td><td>เมตร</td><td class="price-amount">160</td><td>รวมร้อยท่อ</td></tr>
+            <tr><td>16</td><td>ค่าแรงเดินสายไฟ VAF 2×10 sq.mm.</td><td>เมตร</td><td class="price-amount">200</td><td>รวมร้อยท่อ</td></tr>
+            <tr><td>17</td><td>เบรกเกอร์ย่อย + กล่องพลาสติก (ชุดสมบูรณ์)</td><td>ชุด</td><td class="price-amount">150</td><td>กล่อง Sub-breaker สำเร็จรูป</td></tr>
+            <tr><td>18</td><td>ค่าเจาะท็อปพื้นไม้/ไฟเบอร์ (≤120 ซม.)</td><td>จุด</td><td class="price-amount">1,000</td><td>ความยาวไม่เกิน 120 ซม.</td></tr>
+            <tr><td>19</td><td>ค่าเจาะท็อปหินธรรมชาติ/หินเทียม (≤120 ซม.)</td><td>จุด</td><td class="price-amount">2,500</td><td>ความยาวไม่เกิน 120 ซม.</td></tr>
+            <tr><td colspan="5" class="section-heading">หมวด 2 : เครื่องดูดควัน</td></tr>
+            <tr><td>1</td><td>ค่าเจาะช่องระบายอากาศ (Service Opening)</td><td>ตร.ม.</td><td class="price-amount">1,000</td><td>คิดต่อตารางเมตร ตามวัสดุผนังจริง</td></tr>
+            <tr><td>2</td><td>สายไฟ VAF 2×2.5 sq.mm. (เดินไฟเครื่องดูดควัน)</td><td>เมตร</td><td class="price-amount">30</td><td>รวมค่าวัสดุ</td></tr>
+            <tr><td>3</td><td>ท่อร้อยสาย PVC ขนาด 3/4" สีขาว</td><td>เมตร</td><td class="price-amount">70</td><td>ท่อ PVC มาตรฐาน TIS</td></tr>
+            <tr><td>4</td><td>ปลั๊กตัวเมีย 3 ขา พร้อมกล่องฝัง</td><td>ชุด</td><td class="price-amount">200</td><td>รวมกล่องพลาสติก+สกรูยึด</td></tr>
+            <tr><td>5</td><td>สายดิน THW 1.5 sq.mm.</td><td>เมตร</td><td class="price-amount">10</td><td>ราคาต่อเมตร</td></tr>
+            <tr><td>6</td><td>รางครอบสายไฟ #4 พลาสติก</td><td>เมตร</td><td class="price-amount">70</td><td>รวมติดตั้ง</td></tr>
+            <tr><td>7</td><td>แท่งกราวด์ (Ground Rod) ขนาด 30 ซม. ไม่รวมสายไฟ</td><td>จุด</td><td class="price-amount">200</td><td>ราคาต่อจุดฝังดิน</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note-box" style="margin:16px;">
+        ⚠️ รายการเหล่านี้คือค่าใช้จ่ายเพิ่มเติมที่ไม่รวมอยู่ในราคามาตรฐานการติดตั้ง คิดตามจำนวนที่ใช้จริงเท่านั้น
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ======== PAGE: FOSTER ======== -->
+<div id="page-foster" class="page-section">
+<div class="content-wrap">
+  <div class="card">
+    <div class="card-header">
+      <div class="step-num">📋</div>
+      <h2>Foster Installation Pricelist — Updated 2022 (Valid from Jan 2024)</h2>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="price-table-wrap">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">#CAT</th>
+              <th style="width:110px;">รหัสบริการ SAP B1</th>
+              <th>รายการ (TH)</th>
+              <th style="width:120px;">ค่าติดตั้ง (บาท)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>001</td><td><span class="service-id">ZIN-WP08</span></td><td>ค่าติดตั้งซิงค์ล้างจาน "บนเคาเตอร์" (Top mount sink)</td><td class="price-amount">1,000</td></tr>
+            <tr><td>001</td><td><span class="service-id">ZIN-WP18</span></td><td>ค่าติดตั้งซิงค์ล้างจาน "ใต้เคาเตอร์" (Undermount sink)</td><td class="price-amount">1,500</td></tr>
+            <tr><td>003</td><td><span class="service-id">ZIN-WK09</span></td><td>ค่าติดตั้งก๊อกน้ำผสมร้อน-เย็น (Mixer Taps)</td><td class="price-amount">1,000</td></tr>
+            <tr><td>004</td><td><span class="service-id">ZIN-WP20</span></td><td>ค่าติดตั้งเครื่องล้างจานชนิดบิ้วอิน (Built-in Dishwasher)</td><td class="price-amount">2,500</td></tr>
+            <tr><td>005</td><td><span class="service-id">ZIN-WP21</span></td><td>ค่าติดตั้งเครื่องบดเศษอาหาร (Garbage disposal)</td><td class="price-amount">1,300</td></tr>
+            <tr><td>006</td><td><span class="service-id">ZIN-WP22</span></td><td>ค่าติดตั้งเตาแก๊ส (Gas hob)</td><td class="price-amount">1,000</td></tr>
+            <tr><td>007</td><td><span class="service-id">ZIN-WP10</span></td><td>ค่าติดตั้งเตาไฟฟ้า เตาอินดักชั่น (Electric hob)</td><td class="price-amount">1,000</td></tr>
+            <tr><td>008</td><td><span class="service-id">ZIN-WP23</span></td><td>ค่าติดตั้งเครื่องดูดควันชนิด "ติดใต้ตู้" (Under cabinet)</td><td class="price-amount">2,500</td></tr>
+            <tr><td>009</td><td><span class="service-id">ZIN-WP24</span></td><td>ค่าติดตั้งเครื่องดูดควันชนิด "ติดผนัง" (Wall mount)</td><td class="price-amount">2,500</td></tr>
+            <tr><td>010</td><td><span class="service-id">ZIN-WP25</span></td><td>ค่าติดตั้งเครื่องดูดควันชนิด "มีหน้าบานปิด" (Fully hidden)</td><td class="price-amount">3,000</td></tr>
+            <tr><td>011</td><td><span class="service-id">ZIN-WP26</span></td><td>ค่าติดตั้งเครื่องดูดควันชนิด "กลางห้อง" (Island hood)</td><td class="price-amount">5,500</td></tr>
+            <tr><td>012</td><td><span class="service-id">ZIN-WP27</span></td><td>ค่าติดตั้งเครื่องดูดควันชนิด "ติดใต้ฝ้า" (Ceiling hood)</td><td class="price-amount">5,500</td></tr>
+            <tr><td>013</td><td><span class="service-id">ZIN-WP28</span></td><td>ค่าติดตั้งเตาไฟฟ้าพร้อมเครื่องดูดควันในตัว (Integrated)</td><td class="price-amount">5,500</td></tr>
+            <tr><td>013</td><td><span class="service-id">ZIN-WP29</span></td><td>ค่าติดตั้งเครื่องดูดควันชนิด "Down Draft"</td><td class="price-amount">5,500</td></tr>
+            <tr><td>007</td><td><span class="service-id">ZIN-WP31</span></td><td>ค่าติดตั้งเตาอบและไมโครเวฟ (Built-in oven/microwave/steam)</td><td class="price-amount">1,000</td></tr>
+            <tr><td>007</td><td><span class="service-id">ZIN-WP32</span></td><td>ค่าติดตั้งเครื่องชงกาแฟ (Built-in coffee machine)</td><td class="price-amount">1,000</td></tr>
+            <tr><td>007</td><td><span class="service-id">ZIN-WP33</span></td><td>ค่าติดตั้งลิ้นชักอุ่นอาหาร (Warming drawer)</td><td class="price-amount">1,000</td></tr>
+            <tr><td>007</td><td><span class="service-id">ZIN-WP34</span></td><td>ค่าติดตั้งเครื่องสุญญากาศชนิดบิวอิ้น (Vacuum drawer)</td><td class="price-amount">1,500</td></tr>
+            <tr><td>014</td><td><span class="service-id">ZIN-WP35</span></td><td>ค่าติดตั้งตู้เย็น Side by Side ชนิดบิวอิ้น</td><td class="price-amount">2,500</td></tr>
+            <tr><td>015</td><td><span class="service-id">ZIN-WP26</span></td><td>ค่าติดตั้งเครื่องกรองน้ำ PF (PF Water filtration)</td><td class="price-amount">500</td></tr>
+            <tr><td>015</td><td><span class="service-id">ZIN-WP37</span></td><td>ค่าติดตั้งเครื่องกรองน้ำ RO (RO Water filtration)</td><td class="price-amount">1,000</td></tr>
+            <tr><td>016</td><td><span class="service-id">ZIN-WP38</span></td><td>ปลั๊กไฟ หรืออื่นๆ ที่ไม่อยู่ในรายการด้านบน (Miscellaneous)</td><td class="price-amount">600</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note-box" style="margin:16px;">
+        <h4>หมายเหตุ</h4>
+        1. ค่าบริการรวมภาษีมูลค่าเพิ่มแล้ว แต่ไม่รวม: ค่าเดินทางนอกกรุงเทพฯและปริมณฑล / ค่ารื้อถอน / ค่าสำรวจพื้นที่ / ค่าพักค้างคืน 2,400 บาท/วัน/ทีม<br>
+        2. ราคาประเมินจากมาตรฐานหน้างานที่มีความพร้อม บริษัทฯ ขอสงวนสิทธิ์ประเมินราคาใหม่เมื่อช่างเข้าถึงหน้างาน<br>
+        3. ไม่ให้บริการ: เจาะท็อป / เก็บงานช่องเจาะ / เดินท่อแก๊สเกิน 3 ม. / เดินท่อลมบนฝ้าฉาบแล้ว / เดินท่อลมเกิน 7 ม. / วัสดุเปราะบาง<br>
+        4. รับประกันงานติดตั้ง 90 วัน ไม่เกินมูลค่าผลิตภัณฑ์
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ======== PAGE: INSTALLATION DETAIL ======== -->
+<div id="page-detail" class="page-section">
+<div class="content-wrap">
+  <div class="card">
+    <div class="card-header">
+      <div class="step-num">📄</div>
+      <h2>รายละเอียดงานติดตั้ง — สิ่งที่ลูกค้าต้องเตรียม และค่าใช้จ่ายนอกแพ็คเกจ</h2>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="price-table-wrap">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th style="width:30px;">#</th>
+              <th style="min-width:180px;">ประเภทสินค้า</th>
+              <th style="min-width:220px;">สิ่งที่ลูกค้าต้องเตรียม</th>
+              <th style="min-width:200px;">ค่าใช้จ่ายที่ไม่รวมในค่าบริการ</th>
+              <th style="min-width:140px;">การรับประกัน</th>
+              <th style="min-width:160px;">หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>อ่างล้างจานทุกวัสดุ ติดตั้งบนท็อปเคาน์เตอร์</td>
+              <td>• ช่องเจาะเฟอร์นิเจอร์ตามคำแนะนำที่มากับสินค้า<br>• ท่อน้ำทิ้ง Ø40 มม. ถึงจุดต่อเชื่อม<br>• กรณีแพ็คเกจซิงค์+ก๊อก: เตรียมสายน้ำดีความยาวที่เหมาะสม</td>
+              <td>• งานเจาะท็อปชนิดต่างๆ<br>• งานเดินระบบท่อน้ำที่เกินระยะ</td>
+              <td>รับประกัน 180 วัน นับจากวันส่งมอบ</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>อ่างล้างจานแสตนเลส ติดตั้งใต้ท็อปเคาน์เตอร์</td>
+              <td>• ช่องเจาะเฟอร์นิเจอร์ตามคำแนะนำ<br>• ท่อน้ำทิ้ง Ø40 มม.<br>• เตรียมคานรับซิงค์ใต้ท็อป</td>
+              <td>• งานเจาะท็อปชนิดต่างๆ<br>• งานเดินระบบท่อน้ำที่เกินระยะ<br>• คานรับซิงค์</td>
+              <td>รับประกัน 180 วัน</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>ก๊อกน้ำทุกประเภท</td>
+              <td>• ช่องเจาะเฟอร์นิเจอร์<br>• ท่อน้ำดีพร้อมมินิบอลวาล์ว G1/2"<br>• ก๊อกร้อน-เย็น: เตรียม 2 วาล์ว / ก๊อกเย็น: 1 วาล์ว</td>
+              <td>• สต็อปวาล์ว / มินิบอลวาล์ว<br>• สายถักน้ำดีและข้อต่อนิปเปิล (กรณีสายสั้น)</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>รับผิดชอบการรั่วซึมหลังวาล์วน้ำเท่านั้น</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>เครื่องบดเศษอาหาร (สะดือ 110–114 มม.)</td>
+              <td>• เต้าเสียบปลั๊กเยอรมันใต้ตู้ซิงค์ สูงจากพื้น ≥15 ซม.<br>• ช่องเจาะ Ø35 มม. สำหรับปุ่มกด<br>• ท่อน้ำทิ้ง Ø40 มม.</td>
+              <td>• งานเจาะท็อป<br>• เต้าเสียบปลั๊กไฟ</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>กรณีเจาะไม่ได้ ใช้ Wireless switch หรือ Switch พ่วงวงจร</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>เครื่องล้างจาน FREESTANDING</td>
+              <td>• เต้าเสียบปลั๊กเยอรมันใต้ตู้ ≥15 ซม.<br>• ท่อน้ำทิ้งสูงจากพื้น ≤1 ม.<br>• ท่อน้ำดีพร้อมก๊อกสนาม G 6/8"</td>
+              <td>• เต้าเสียบปลั๊กไฟ<br>• ก๊อกสนาม</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>เตรียมระบบประปาและปลั๊กตรงตำแหน่งตู้ซิงค์</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>เครื่องกรองน้ำชนิด RO</td>
+              <td>• ท่อน้ำดีพร้อมมินิบอลวาล์ว G1/2"<br>• ท่อน้ำทิ้ง Ø40 มม.<br>• เต้าเสียบปลั๊กไทย<br>• ก๊อกน้ำดื่ม</td>
+              <td>• เต้าเสียบปลั๊กไฟ<br>• ก๊อกน้ำดื่ม<br>• สต็อปวาล์ว<br>• งานเจาะท็อป</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>ศึกษาว่าติดตั้งบนหรือใต้เคาน์เตอร์เพื่อเตรียมหน้างานถูกต้อง</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>เครื่องกรองน้ำชนิด NON RO</td>
+              <td>• ท่อน้ำดีพร้อมมินิบอลวาล์ว G1/2"<br>• ก๊อกน้ำดื่ม</td>
+              <td>• สต็อปวาล์ว<br>• ก๊อกน้ำดื่ม<br>• งานเจาะท็อป</td>
+              <td>รับประกัน 180 วัน</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>เตาแก๊สชนิดฝังหรือตั้งบนเคาน์เตอร์</td>
+              <td>• ช่องเจาะเฟอร์นิเจอร์<br>• กรณีเตา AC: เดินสายไฟ 0.5 ทิ้งไว้ใน Junction box<br>• สายแก๊สสะดือ 95 มม. + หัวปรับแรงดัน 0.04 กก./ซม² / 2 กก./ชม.</td>
+              <td>• งานเจาะท็อป<br>• กล่อง Electric Junction box<br>• สายแก๊ส<br>• หัวปรับแก๊สแรงดันต่ำ</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>เดินท่อแก๊สระยะยาว: ติดตั้งวาล์วปิดแก๊สและหัวปรับแรงดันต่ำใต้ตู้</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>เตาไฟฟ้าชนิดฝังบนเคาน์เตอร์</td>
+              <td>• เบรคเกอร์แยกวงจรขนาดเหมาะสม ที่ตู้ MDB<br>• สายไฟขนาดเหมาะสมพร้อมสายดิน จาก breaker ถึง Junction box ใต้ตู้</td>
+              <td>• งานเจาะท็อป<br>• เบรคเกอร์<br>• กล่อง Electric Junction box<br>• งานเดินสายไฟจาก breaker ถึง Junction box</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>ต้องเดินสายดิน และไม่ผ่าน SAFE-T-CUT</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>เครื่องดูดควัน ติดผนัง/ซ่อนในตู้ ระบบหมุนเวียนอากาศ</td>
+              <td>• ช่องระบายอากาศขาออกขนาดเหมาะสม<br>• เต้าเสียบปลั๊กไทย</td>
+              <td>• งานเดินสายไฟและเต้าเสียบปลั๊กไฟ<br>• แผ่นกรองคาร์บอนฟิลเตอร์</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>เครื่องดูดควันต้องมีแผ่นกรองคาร์บอนฟิลเตอร์</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>เครื่องดูดควัน ติดผนัง/ซ่อนในตู้ ระบบต่อท่อดูดอากาศ</td>
+              <td>• ท่อลม Ø ไม่เล็กกว่าช่องลมออกของเครื่อง<br>• เต้าเสียบปลั๊กไทย</td>
+              <td>• ท่อลม<br>• เต้าเสียบปลั๊กไฟ<br>• ฝาครอบท่อลม<br>• ช่องเจาะท่อลมออกนอกบ้าน</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>ผนังยิปซั่ม: ต้องกรุผนังด้วยวัสดุแข็งแรงรับน้ำหนักเครื่องได้</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>เครื่องดูดควันชนิดกลางห้อง</td>
+              <td>• ท่อลม Ø ไม่เล็กกว่าช่องลมออกของเครื่อง<br>• เต้าเสียบปลั๊กไทย</td>
+              <td>• ท่อลม<br>• เต้าเสียบปลั๊กไฟ<br>• ฝาครอบท่อลม<br>• ช่องเจาะท่อลม<br>• โครงเคร่ารับเครื่อง</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>ฝ้าเพดานต้องกรุด้วยวัสดุ/โครงเคร่าที่แข็งแรงพอรับน้ำหนัก</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>เตาอบไฟฟ้า/ไมโครเวฟ ฝังตู้เฟอร์นิเจอร์</td>
+              <td>• ตู้เฟอร์นิเจอร์มีช่องระบายอากาศเข้า-ออกตามคำแนะนำ<br>• เบรคเกอร์แยกวงจรที่ตู้ MDB<br>• สายไฟพร้อมสายดิน จาก breaker ถึง Junction box ในตู้</td>
+              <td>• เบรคเกอร์<br>• งานเดินสายไฟและเต้าเสียบปลั๊กไฟ<br>• กล่อง Electric Junction box</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>ต้องเดินสายดิน และไม่ผ่าน SAFE-T-CUT</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>เตาแก๊ส+เตาอบ FREESTANDING (Range)</td>
+              <td>• เบรคเกอร์แยกวงจรที่ตู้ MDB<br>• สายไฟพร้อมสายดิน ถึงบริเวณวางผลิตภัณฑ์<br>• สายแก๊ส + หัวปรับแรงดันต่ำ</td>
+              <td>• เบรคเกอร์<br>• งานเดินสายไฟ<br>• กล่อง Electric Junction box<br>• สายแก๊ส<br>• หัวปรับแก๊สแรงดันต่ำ</td>
+              <td>รับประกัน 180 วัน</td>
+              <td>ต้องเดินสายดิน ไม่ผ่าน SAFE-T-CUT / เดินท่อแก๊สระยะยาว ติดตั้งวาล์วปิดแก๊ส</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <div class="footer-logo">
+      <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="footer-name">บจก. เฟิสท์ เซอร์วิส เซ็นเตอร์ (ไทยแลนด์)</div>
+      <div class="footer-name-en">First Service Center (Thailand) Co., Ltd.</div>
+    </div>
+  </div>
+  <div class="footer-desc">
+    ระบบคำนวนค่าเดินทาง งานบริการนอกพื้นที่เขตกรุงเทพฯและปริมณฑล<br>
+    ฝ่ายผลิตภัณฑ์และงานบริการ — V01.00
+  </div>
+</footer>
+
+<script>
+/* ===== NAV ===== */
+function switchPage(id) {
+  document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  const map = { calc:0, eve:1, misc:2, foster:3, detail:4 };
+  tabs[map[id]].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ===== DATE ===== */
+const TH_MONTHS = ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+function updateDateDisplay() {
+  const input = document.getElementById('trip-date');
+  const hint = document.getElementById('date-hint');
+  if (!input.value) { hint.style.display = 'none'; return; }
+  const [y, m, d] = input.value.split('-');
+  hint.textContent = `${parseInt(d)} ${TH_MONTHS[parseInt(m)]} ${parseInt(y)+543}`;
+  hint.style.display = 'block';
+}
+
+function formatDateThai(val) {
+  if (!val) return '—';
+  const [y, m, d] = val.split('-');
+  return `${parseInt(d)} ${TH_MONTHS[parseInt(m)]} ${parseInt(y)+543}`;
+}
+
+/* ===== CALCULATE ===== */
+let lastResult = null;
+
+function calculate() {
+  const distance  = parseFloat(document.getElementById('distance').value);
+  const fuelPrice = parseFloat(document.getElementById('fuel-price').value);
+  const name      = document.getElementById('emp-name').value || '—';
+  const dept      = document.getElementById('emp-dept').value || '—';
+  const date      = formatDateThai(document.getElementById('trip-date').value);
+  const purpose   = document.getElementById('trip-purpose').value || '—';
+  const from      = document.getElementById('trip-from').value || '—';
+  const to        = document.getElementById('trip-to').value || '—';
+
+  if (!distance || distance <= 0) { alert('กรุณากรอกระยะทาง'); return; }
+  if (!fuelPrice || fuelPrice <= 0) { alert('กรุณากรอกราคาน้ำมันดีเซล'); return; }
+
+  const STD_RATE = 10;
+  const MARKUP   = 1.20;
+
+  const fuelUsed  = distance / STD_RATE;
+  const baseCost  = fuelUsed * fuelPrice;
+  const totalCost = baseCost * MARKUP;
+
+  const fmt = (n, dec=2) => n.toLocaleString('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+  document.getElementById('result-amount').textContent = fmt(totalCost);
+  document.getElementById('result-note').textContent   = `${distance.toFixed(0)} กม. ÷ ${STD_RATE} × ฿${fuelPrice.toFixed(2)}/ล. × ${MARKUP} = ฿${fmt(totalCost)}`;
+
+  document.getElementById('r-distance').textContent  = distance.toFixed(0);
+  document.getElementById('r-fuel').textContent      = fuelUsed.toFixed(2);
+  document.getElementById('r-cost').textContent      = fmt(baseCost);
+  document.getElementById('r-price').textContent     = fuelPrice.toFixed(2);
+
+  document.getElementById('fr-name').textContent    = name;
+  document.getElementById('fr-dept').textContent    = dept;
+  document.getElementById('fr-date').textContent    = date;
+  document.getElementById('fr-purpose').textContent = purpose;
+  document.getElementById('fr-route').textContent   = `${from} → ${to}`;
+  document.getElementById('fr-dist').textContent    = `${distance.toFixed(0)} กม.`;
+  document.getElementById('fr-fuel').textContent    = `${fuelUsed.toFixed(2)} ลิตร`;
+  document.getElementById('fr-price').textContent   = `฿${fuelPrice.toFixed(2)}/ลิตร`;
+  document.getElementById('fr-base').textContent    = `฿${fmt(baseCost)}`;
+  document.getElementById('fr-total').textContent   = `฿${fmt(totalCost)}`;
+
+  lastResult = { name, dept, date, purpose, route: `${from} → ${to}`, distance, fuelPrice, fuelUsed, baseCost, totalCost };
+
+  const rs = document.getElementById('result-section');
+  rs.classList.add('show');
+  document.getElementById('save-status').style.display = 'none';
+  document.getElementById('save-status').className = 'save-status';
+  rs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ===== SAVE TO GOOGLE SHEET ===== */
+async function saveToSheet() {
+  if (!lastResult) return;
+  const btn = document.getElementById('btn-save');
+  const status = document.getElementById('save-status');
+  btn.disabled = true;
+  btn.textContent = 'กำลังบันทึก...';
+
+  const SHEET_ID = '1SFmoBFsxez_lXC-FvvB-VtAamHi4AxxopTcBegsq5G8';
+  const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?gid=0#gid=0`;
+
+  const row = [
+    new Date().toLocaleString('th-TH'),
+    lastResult.name,
+    lastResult.dept,
+    lastResult.date,
+    lastResult.purpose,
+    lastResult.route,
+    lastResult.distance,
+    10,
+    lastResult.fuelPrice.toFixed(2),
+    lastResult.fuelUsed.toFixed(2),
+    lastResult.baseCost.toFixed(2),
+    1.20,
+    lastResult.totalCost.toFixed(2),
+    'รถกระบะ 4WD / ดีเซล'
+  ];
+
+  const csvLine = row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+
+  try {
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_ID/exec';
+    const resp = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sheetId: SHEET_ID, row })
+    });
+
+    status.className = 'save-status success';
+    status.textContent = '✓ ส่งข้อมูลแล้ว — กรุณาตรวจสอบใน Google Sheet';
+    status.style.display = 'block';
+
+    const link = document.createElement('a');
+    link.href = BASE_URL;
+    link.target = '_blank';
+    link.style.display = 'block';
+    link.style.textAlign = 'center';
+    link.style.fontSize = '12px';
+    link.style.marginTop = '6px';
+    link.style.color = 'var(--accent)';
+    link.textContent = '→ เปิด Google Sheet';
+    status.appendChild(link);
+  } catch(e) {
+    status.className = 'save-status error';
+    status.innerHTML = `⚠️ ไม่สามารถบันทึกอัตโนมัติได้ — <a href="${BASE_URL}" target="_blank" style="color:var(--coral);font-weight:700;">คลิกเพื่อเปิด Google Sheet และบันทึกด้วยตนเอง</a><br><small style="opacity:0.7;">ข้อมูล: ${csvLine}</small>`;
+    status.style.display = 'block';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> บันทึกข้อมูลลง Google Sheet`;
+}
+
+/* ===== RESET ===== */
+function resetForm() {
+  ['emp-name','emp-dept','trip-purpose','trip-from','trip-to'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('trip-date').value = '';
+  document.getElementById('date-hint').style.display = 'none';
+  document.getElementById('distance').value = '';
+  document.getElementById('fuel-price').value = '';
+  document.getElementById('result-section').classList.remove('show');
+  document.getElementById('save-status').style.display = 'none';
+  document.getElementById('save-status').className = 'save-status';
+  lastResult = null;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
