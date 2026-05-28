@@ -664,6 +664,9 @@ footer {
             <input type="number" id="distance" placeholder="0" min="0" step="1" />
             <span class="unit-label">กม.</span>
           </div>
+          <div style="margin-top:6px; background:var(--amber-light); border:1px solid rgba(180,83,9,0.18); border-radius:8px; padding:9px 12px; font-size:12px; color:var(--amber); line-height:1.6;">
+            💡 กรุณากรอกระยะทางไป-กลับ เช่น ระยะห่างจากสำนักงาน — site งาน คือ 100 กม. ดังนั้นระยะทางไป-กลับ = 100 × 2 = <strong>200 กม.</strong>
+          </div>
         </div>
       </div>
     </div>
@@ -695,15 +698,16 @@ footer {
         <div class="form-group">
           <label>ราคาน้ำมันดีเซล (บาท/ลิตร)</label>
           <div class="input-unit">
-            <input type="number" id="fuel-price" placeholder="เช่น 33.50" min="0" step="0.01" />
+            <input type="number" id="fuel-price" placeholder="กำลังโหลด..." min="0" step="0.01" />
             <span class="unit-label">บาท/ล.</span>
           </div>
+          <div id="fuel-price-status" style="margin-top:5px; font-size:12px; color:var(--text-light);">กำลังดึงราคาน้ำมัน Caltex...</div>
         </div>
 
       </div>
       <div class="info-box">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>ค่าเดินทางที่เรียกเก็บ = ต้นทุนค่าน้ำมัน × 1.20 (ตัวคูณ Markup 20%) — ใส่ราคาน้ำมันดีเซลเฉลี่ยรายเดือนจากกรมธุรกิจพลังงาน</span>
+        <span>ราคาน้ำมันดีเซลอ้างอิง Caltex </span>
       </div>
     </div>
   </div>
@@ -719,7 +723,7 @@ footer {
   <div class="result-section" id="result-section" style="margin-top:20px;">
 
     <div class="result-hero">
-      <div class="label-sm">ค่าเดินทางที่เรียกเก็บ (รวม Markup 20%)</div>
+      <div class="label-sm">ค่าเดินทางที่เรียกเก็บ (รวม Markup 50%)</div>
       <div class="amount">
         <span class="currency">฿</span><span id="result-amount">0</span>
       </div>
@@ -736,12 +740,12 @@ footer {
         <div class="ci-val"><span id="r-fuel">—</span><span class="ci-unit">ลิตร</span></div>
       </div>
       <div class="cost-item">
-        <div class="ci-label">ต้นทุนค่าน้ำมัน</div>
-        <div class="ci-val">฿<span id="r-cost">—</span></div>
-      </div>
-      <div class="cost-item">
         <div class="ci-label">ราคาน้ำมัน</div>
         <div class="ci-val"><span id="r-price">—</span><span class="ci-unit">บาท/ล.</span></div>
+      </div>
+      <div class="cost-item" style="border:1.5px solid rgba(29,78,138,0.3); background:var(--primary-light);">
+        <div class="ci-label" style="color:var(--primary);">ค่าเดินทางที่เรียกเก็บ</div>
+        <div class="ci-val" style="color:var(--primary);">฿<span id="r-total-card">—</span></div>
       </div>
     </div>
 
@@ -757,8 +761,6 @@ footer {
       <div class="formula-row"><span class="f-label">ระยะทาง</span><span class="f-val" id="fr-dist">—</span></div>
       <div class="formula-row"><span class="f-label">ปริมาณน้ำมัน (ระยะทาง ÷ 10)</span><span class="f-val" id="fr-fuel">—</span></div>
       <div class="formula-row"><span class="f-label">ราคาน้ำมันดีเซล</span><span class="f-val" id="fr-price">—</span></div>
-      <div class="formula-row"><span class="f-label">ต้นทุนค่าน้ำมัน</span><span class="f-val" id="fr-base">—</span></div>
-      <div class="formula-row"><span class="f-label">ตัวคูณ Markup</span><span class="f-val">× 1.20</span></div>
       <div class="formula-row total"><span class="f-label">ค่าเดินทางที่เรียกเก็บ</span><span class="f-val" id="fr-total">—</span></div>
     </div>
 
@@ -1123,6 +1125,48 @@ function switchPage(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+/* ===== FETCH DIESEL PRICE FROM CALTEX (via CORS proxy) ===== */
+async function fetchDieselPrice() {
+  const statusEl = document.getElementById('fuel-price-status');
+  const input = document.getElementById('fuel-price');
+  const CALTEX_URL = 'https://www.caltex.com/th/motorists/products-and-services/fuel-prices.html';
+  const PROXY = 'https://api.allorigins.win/get?url=' + encodeURIComponent(CALTEX_URL);
+
+  try {
+    statusEl.style.color = 'var(--text-light)';
+    statusEl.textContent = '⏳ กำลังดึงราคาน้ำมัน Caltex...';
+    const resp = await fetch(PROXY, { signal: AbortSignal.timeout(10000) });
+    const data = await resp.json();
+    const html = data.contents || '';
+
+    // Try multiple patterns for "ดีเซล เทครอน® ดี" price
+    const patterns = [
+      /ดีเซล\s*เทครอน[®]?\s*ดี[\s\S]{0,300}?(\d{2}\.\d{2})/i,
+      /Techron\s*D[\s\S]{0,200}?(\d{2}\.\d{2})/i,
+      /diesel[\s\S]{0,200}?(\d{2}\.\d{2})/i
+    ];
+
+    let price = null;
+    for (const pat of patterns) {
+      const m = html.match(pat);
+      if (m) { price = parseFloat(m[1]); break; }
+    }
+
+    if (price && price > 20 && price < 60) {
+      input.value = price.toFixed(2);
+      input.placeholder = price.toFixed(2);
+      statusEl.style.color = 'var(--accent)';
+      statusEl.textContent = `✓ ราคาน้ำมัน Caltex ดีเซล เทครอน® ดี = ฿${price.toFixed(2)}/ลิตร (อัปเดตอัตโนมัติ)`;
+    } else {
+      throw new Error('parse_fail');
+    }
+  } catch(e) {
+    statusEl.style.color = 'var(--amber)';
+    statusEl.innerHTML = `⚠️ ดึงราคาอัตโนมัติไม่ได้ — <a href="https://www.caltex.com/th/motorists/products-and-services/fuel-prices.html" target="_blank" style="color:var(--primary);">ตรวจสอบราคา Caltex</a> แล้วกรอกเอง`;
+    input.placeholder = 'กรอกราคาน้ำมัน';
+  }
+}
+
 /* ===== DATE ===== */
 const TH_MONTHS = ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
@@ -1158,7 +1202,7 @@ function calculate() {
   if (!fuelPrice || fuelPrice <= 0) { alert('กรุณากรอกราคาน้ำมันดีเซล'); return; }
 
   const STD_RATE = 10;
-  const MARKUP   = 1.20;
+  const MARKUP   = 1.50;
 
   const fuelUsed  = distance / STD_RATE;
   const baseCost  = fuelUsed * fuelPrice;
@@ -1171,8 +1215,8 @@ function calculate() {
 
   document.getElementById('r-distance').textContent  = distance.toFixed(0);
   document.getElementById('r-fuel').textContent      = fuelUsed.toFixed(2);
-  document.getElementById('r-cost').textContent      = fmt(baseCost);
   document.getElementById('r-price').textContent     = fuelPrice.toFixed(2);
+  document.getElementById('r-total-card').textContent = fmt(totalCost);
 
   document.getElementById('fr-name').textContent    = name;
   document.getElementById('fr-dept').textContent    = dept;
@@ -1182,7 +1226,6 @@ function calculate() {
   document.getElementById('fr-dist').textContent    = `${distance.toFixed(0)} กม.`;
   document.getElementById('fr-fuel').textContent    = `${fuelUsed.toFixed(2)} ลิตร`;
   document.getElementById('fr-price').textContent   = `฿${fuelPrice.toFixed(2)}/ลิตร`;
-  document.getElementById('fr-base').textContent    = `฿${fmt(baseCost)}`;
   document.getElementById('fr-total').textContent   = `฿${fmt(totalCost)}`;
 
   lastResult = { name, dept, date, purpose, route: `${from} → ${to}`, distance, fuelPrice, fuelUsed, baseCost, totalCost };
@@ -1217,7 +1260,7 @@ async function saveToSheet() {
     lastResult.fuelPrice.toFixed(2),
     lastResult.fuelUsed.toFixed(2),
     lastResult.baseCost.toFixed(2),
-    1.20,
+    1.50,
     lastResult.totalCost.toFixed(2),
     'รถกระบะ 4WD / ดีเซล'
   ];
@@ -1240,11 +1283,7 @@ async function saveToSheet() {
     const link = document.createElement('a');
     link.href = BASE_URL;
     link.target = '_blank';
-    link.style.display = 'block';
-    link.style.textAlign = 'center';
-    link.style.fontSize = '12px';
-    link.style.marginTop = '6px';
-    link.style.color = 'var(--accent)';
+    link.style.cssText = 'display:block;text-align:center;font-size:12px;margin-top:6px;color:var(--accent);';
     link.textContent = '→ เปิด Google Sheet';
     status.appendChild(link);
   } catch(e) {
@@ -1268,8 +1307,12 @@ function resetForm() {
   document.getElementById('save-status').style.display = 'none';
   document.getElementById('save-status').className = 'save-status';
   lastResult = null;
+  fetchDieselPrice();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+/* ===== INIT: fetch price on page load ===== */
+window.addEventListener('DOMContentLoaded', fetchDieselPrice);
 </script>
 </body>
 </html>
